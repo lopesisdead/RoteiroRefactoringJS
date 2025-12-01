@@ -59,22 +59,54 @@ function calcularTotalFatura(pecas, apresentacoes) {
     return totalFatura;
 }
 
+// Função existente que retorna a fatura em string pura
 function gerarFaturaStr (fatura, pecas) {
     
     let faturaStr = `Fatura ${fatura.cliente}\n`;
   
     for (let apre of fatura.apresentacoes) {
-        // As chamadas foram ajustadas para incluir 'pecas'
       faturaStr += `  ${getPeca(pecas, apre).nome}: ${formatarMoeda(calcularTotalApresentacao(pecas, apre))} (${apre.audiencia} assentos)\n`;
     }
     
-    // As chamadas foram ajustadas para incluir 'pecas' e 'fatura.apresentacoes'
     faturaStr += `Valor total: ${formatarMoeda(calcularTotalFatura(pecas, fatura.apresentacoes))}\n`;
     faturaStr += `Créditos acumulados: ${calcularTotalCreditos(pecas, fatura.apresentacoes)} \n`;
     return faturaStr;
 }
 
+// NOVA FUNÇÃO: Retorna a fatura em string com tags HTML
+function gerarFaturaHtml (fatura, pecas) {
+    let faturaHtml = `<html>\n<p>Fatura ${fatura.cliente}</p>\n`;
+    faturaHtml += '<ul>\n';
+    
+    for (let apre of fatura.apresentacoes) {
+        // Usa as funções de cálculo e formatação já existentes
+        const peca = getPeca(pecas, apre);
+        const valorFormatado = formatarMoeda(calcularTotalApresentacao(pecas, apre));
+        
+        faturaHtml += `<li>${peca.nome}: ${valorFormatado} (${apre.audiencia} assentos)</li>\n`;
+    }
+    
+    faturaHtml += '</ul>\n';
+    
+    const total = formatarMoeda(calcularTotalFatura(pecas, fatura.apresentacoes));
+    const creditos = calcularTotalCreditos(pecas, fatura.apresentacoes);
+    
+    faturaHtml += `<p>Valor total: ${total}</p>\n`;
+    faturaHtml += `<p>Créditos acumulados: ${creditos}</p>\n`;
+    faturaHtml += '</html>';
+    
+    return faturaHtml;
+}
+
+
 const faturas = JSON.parse(readFileSync('./faturas.json'));
 const pecas = JSON.parse(readFileSync('./pecas.json'));
+
+// Chamada para a fatura em string
 const faturaStr = gerarFaturaStr(faturas, pecas);
 console.log(faturaStr);
+
+// Chamada para a nova fatura em HTML
+const faturaHtml = gerarFaturaHtml(faturas, pecas);
+console.log('\n=================================\n'); // Separador
+console.log(faturaHtml);
